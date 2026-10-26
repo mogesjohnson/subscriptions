@@ -107,3 +107,22 @@ export function dueLabel(days) {
   if (days === 1) return 'Renews tomorrow';
   return `Renews in ${days} days`;
 }
+
+export const PERSIST_KEY = 'subs.persistAsked';
+
+/**
+ * Ask once for persistent storage. Every step is guarded: no navigator, no
+ * navigator.storage, no persist(), no localStorage, or a rejection all resolve
+ * to false instead of throwing. Resolves true only when the browser granted it.
+ */
+export async function requestPersist(nav = globalThis.navigator, storage) {
+  try {
+    const store = storage === undefined ? globalThis.localStorage : storage;
+    if (store?.getItem(PERSIST_KEY)) return false;
+    store?.setItem(PERSIST_KEY, '1');
+    if (typeof nav?.storage?.persist !== 'function') return false;
+    return (await nav.storage.persist()) === true;
+  } catch {
+    return false;
+  }
+}

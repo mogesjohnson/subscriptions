@@ -1,5 +1,5 @@
 // DOM layer: renders the list and totals from js/store.js.
-import { dueLabel, daysUntil, formatUSD, load, save, sortByRenewal, today, totals } from './store.js';
+import { dueLabel, daysUntil, formatUSD, load, requestPersist, save, sortByRenewal, today, totals } from './store.js';
 
 export const state = { items: load() };
 
@@ -45,18 +45,8 @@ export function render() {
   }
 }
 
-async function persistOnce() {
-  try {
-    if (localStorage.getItem('subs.persistAsked')) return;
-    localStorage.setItem('subs.persistAsked', '1');
-    if (navigator.storage?.persist) await navigator.storage.persist();
-  } catch {
-    // Storage persistence is best effort.
-  }
-}
-
 render();
-persistOnce();
+requestPersist();
 import('./form.js').then((m) => m.init());
 
 if ('serviceWorker' in navigator) {
