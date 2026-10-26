@@ -23,5 +23,42 @@
     <p class="empty" id="empty" hidden>No subscriptions yet.</p>
     <ul class="list" id="list" aria-label="Subscriptions, soonest renewal first"></ul>
   </main>
+
+  <button type="button" class="btn primary fab" id="add">+ Add</button>
+
+  <dialog id="dialog" aria-labelledby="dialog-title">
+    <form id="form" method="dialog" novalidate>
+      <h2 id="dialog-title">Add subscription</h2>
+      <input type="hidden" name="id">
+      <div class="field">
+        <label for="f-name">Name</label>
+        <input id="f-name" name="name" type="text" maxlength="60" autocomplete="off" required>
+        <span class="error" id="e-name"></span>
+      </div>
+      <div class="field">
+        <label for="f-price">Price (USD)</label>
+        <input id="f-price" name="price" type="number" inputmode="decimal" min="0" step="0.01" required>
+        <span class="error" id="e-price"></span>
+      </div>
+      <div class="field">
+        <label for="f-cycle">Billing cycle</label>
+        <select id="f-cycle" name="cycle">
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+        <span class="error" id="e-cycle"></span>
+      </div>
+      <div class="field">
+        <label for="f-next">Next renewal</label>
+        <input id="f-next" name="next" type="date" required>
+        <span class="error" id="e-next"></span>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn danger" id="delete" hidden>Delete</button>
+        <button type="button" class="btn" id="cancel">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>
