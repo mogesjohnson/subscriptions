@@ -18,17 +18,21 @@ export function parseStored(raw) {
   }
 }
 
-export function load(storage = globalThis.localStorage) {
+// Reading globalThis.localStorage can itself throw (blocked storage), so it stays inside try.
+export function load(storage) {
   try {
-    return parseStored(storage?.getItem(STORAGE_KEY));
+    const store = storage === undefined ? globalThis.localStorage : storage;
+    return parseStored(store?.getItem(STORAGE_KEY));
   } catch {
     return [];
   }
 }
 
-export function save(items, storage = globalThis.localStorage) {
+export function save(items, storage) {
   try {
-    storage?.setItem(STORAGE_KEY, JSON.stringify({ version: 1, items }));
+    const store = storage === undefined ? globalThis.localStorage : storage;
+    if (!store) return false;
+    store.setItem(STORAGE_KEY, JSON.stringify({ version: 1, items }));
     return true;
   } catch {
     return false;
@@ -47,7 +51,8 @@ export function validate(s) {
   const name = typeof s?.name === 'string' ? s.name.trim() : '';
   if (!name) errors.name = 'Enter a name.';
   else if (name.length > 60) errors.name = 'Keep the name under 60 characters.';
-  const price = typeof s?.price === 'string' ? Number(s.price) : s?.price;
+  // Number('') is 0, so a blank string must not count as a price.
+  const price = typeof s?.price === 'string' ? (s.price.trim() === '' ? NaN : Number(s.price)) : s?.price;
   if (typeof price !== 'number' || !Number.isFinite(price) || price < 0) errors.price = 'Enter a price of 0 or more.';
   else if (price > 100000) errors.price = 'Enter a price under 100,000.';
   else if (Math.round(price * 100) !== Number((price * 100).toFixed(6))) errors.price = 'Use at most 2 decimals.';
@@ -78,17 +83,32 @@ export function today(now = new Date()) {
 
 /** Whole days from `from` to `to` (both YYYY-MM-DD); negative when past due. */
 export function daysUntil(to, from) {
+  if (!isDate(to) || !isDate(from)) return NaN;
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY);
 }
 
+/** Soonest renewal first; ties by name; rows without a valid date go last. */
 export function sortByRenewal(items) {
-  return [...items].sort((a, b) => a.next.localeCompare(b.next) || a.name.localeCompare(b.name));
+  const key = (s) => (isDate(s?.next) ? s.next : '\uffff');
+  const name = (s) => (typeof s?.name === 'string' ? s.name : '');
+  return [...items].sort((a, b) => key(a).localeCompare(key(b)) || name(a).localeCompare(name(b)));
 }
 
+/**
+ * Monthly total (yearly / 12) and yearly total (monthly x 12), rounded to cents.
+ * Both are summed in cents from the raw prices, so a $10/year plan adds exactly
+ * $10.00 to the yearly total instead of 12 x $0.83 = $9.96.
+ */
 export function totals(items) {
-  let monthly = 0;
-  for (const s of items) monthly += s.cycle === 'yearly' ? s.price / 12 : s.price;
-  return { monthly, yearly: monthly * 12 };
+  let monthlyCents = 0;
+  let yearlyCents = 0;
+  for (const s of items) {
+    const cents = Math.round(Number(s.price) * 100);
+    if (!Number.isFinite(cents)) continue;
+    monthlyCents += s.cycle === 'yearly' ? cents / 12 : cents;
+    yearlyCents += s.cycle === 'yearly' ? cents : cents * 12;
+  }
+  return { monthly: Math.round(monthlyCents) / 100, yearly: Math.round(yearlyCents) / 100 };
 }
 
 export function upsert(items, sub) {
@@ -102,6 +122,7 @@ export function upsert(items, sub) {
 export const remove = (items, id) => items.filter((s) => s.id !== id);
 
 export function dueLabel(days) {
+  if (!Number.isFinite(days)) return 'No valid renewal date';
   if (days < 0) return `${-days} day${days === -1 ? '' : 's'} past due`;
   if (days === 0) return 'Renews today';
   if (days === 1) return 'Renews tomorrow';
