@@ -58,3 +58,7 @@ async function persistOnce() {
 render();
 persistOnce();
 import('./form.js').then((m) => m.init());
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
+}
