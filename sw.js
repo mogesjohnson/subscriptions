@@ -1,6 +1,6 @@
 // Caches the app shell for offline use. Paths are relative to this file,
 // so it works at the site root and under the Pages subpath /subscriptions/.
-const CACHE = 'subs-shell-v1';
+const CACHE = 'subs-shell-v2';
 const SHELL = [
   './',
   './index.html',
