@@ -1,6 +1,6 @@
 # 0001: subscriptions PWA
 
-Status: in progress. Owner: Moges Johnson. Agent: grok-bot.
+Status: done. Owner: Moges Johnson. Agent: grok-bot.
 
 ## Goal
 
