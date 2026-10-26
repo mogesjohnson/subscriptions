@@ -7,6 +7,7 @@
 ## What this repo is
 
 <!-- REPO-SPECIFIC: one or two sentences. What it does, who uses it, current version. -->
+subscriptions: a static, offline PWA for tracking Moges's subscriptions on Android. v0.1.
 <!-- /REPO-SPECIFIC -->
 
 ## Commands
@@ -14,17 +15,19 @@
 Run these from the repo root. They are the only definition of "checks pass".
 
 <!-- REPO-SPECIFIC: replace with the real commands. Delete any that do not exist. -->
-- Install: `npm ci`
-- Lint: `npm run lint`
-- Types: `npm run typecheck`
-- Test: `npm test`
-- Build: `npm run build`
+- Test: `npm test` (node:test, no dependencies; also `node --check` on every module)
+- Run: `python3 -m http.server` and open http://localhost:8000/
 - Hooks (once per clone): `node scripts/setup-hooks.mjs`
 <!-- /REPO-SPECIFIC -->
 
 ## Where things live
 
 <!-- REPO-SPECIFIC: five to ten lines. Path, then what it holds. No full tree. -->
+- `index.html`, `styles.css`: the app shell, served as-is by GitHub Pages.
+- `js/store.js`: pure logic (validation, sorting, totals) and localStorage.
+- `js/app.js`: DOM rendering and events.
+- `sw.js`, `manifest.webmanifest`, `icons/`: PWA pieces.
+- `test/`: node:test suites for `js/store.js`.
 <!-- /REPO-SPECIFIC -->
 
 ## How work flows
@@ -62,4 +65,6 @@ Read RULES.md before your first commit. The short version:
 <!-- REPO-SPECIFIC: at most ten lines. Domain rules only this repo needs
      (for example "evidence receipts are sanitized" or "the reference site is read-only").
      Anything that applies to every repo belongs in BEST-OF-AI-DEV instead. -->
+- No build step, no runtime dependencies, no network calls, no analytics. Data stays in localStorage.
+- Paths stay relative (`./`) so the app works under the Pages subpath /subscriptions/.
 <!-- /REPO-SPECIFIC -->

@@ -1,8 +1,13 @@
 {
-  "name": "your-repo",
+  "name": "subscriptions",
   "private": true,
+  "type": "module",
+  "description": "Static offline PWA for tracking subscriptions. No build step, no dependencies.",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "prepare": "node scripts/setup-hooks.mjs",
-    "test": "node scripts/test/run.mjs"
+    "test": "node scripts/check-js.mjs && node --test test/*.test.js"
   }
 }
