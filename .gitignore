@@ -1,0 +1,36 @@
+# BEST-OF-AI-DEV template v1. Secrets and local state never enter Git (RULES.md R12).
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+config.local.*
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Agent runtime output: transcripts, scratch, worktrees
+.runtime/
+.agent-runs/
+.worktrees/
+*.transcript.jsonl
+
+# Dependencies and builds
+node_modules/
+dist/
+build/
+out/
+.next/
+coverage/
+*.tsbuildinfo
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# REPO-SPECIFIC-BELOW: add repo entries after this line.

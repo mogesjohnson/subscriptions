@@ -1,0 +1,7 @@
+#!/bin/sh
+# BEST-OF-AI-DEV template v1. Installed by: node scripts/setup-hooks.mjs
+# Git for Windows runs this with its bundled sh, so it works from PowerShell too.
+# REPO-SPECIFIC: change SCRIPTS only if the checks live somewhere else.
+SCRIPTS=scripts
+# /REPO-SPECIFIC
+exec node "$SCRIPTS/check/commit-msg.mjs" "$1"

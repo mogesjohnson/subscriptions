@@ -1,0 +1,11 @@
+# BEST-OF-AI-DEV template v1. Normalize line endings so Windows and CI agree.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
+package-lock.json linguist-generated=true -diff
+pnpm-lock.yaml linguist-generated=true -diff

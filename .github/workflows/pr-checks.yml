@@ -1,0 +1,76 @@
+# BEST-OF-AI-DEV template v1. Fast PR gates; no install step, about 20 seconds.
+# This is the workflow to mark required in the main ruleset: it runs on every PR.
+# Until a ruleset marks it required, a red run does not block the merge button.
+#
+# Trust: on pull_request, GitHub runs the PR's own copy of this file and of scripts/.
+# A PR could loosen pr-size.mjs and pass its own gate. So every gate runs the checker
+# copy from the BASE commit, through the base copy of gate.mjs. A PR can still edit
+# this workflow file; only a required review of .github/ (ruleset plus CODEOWNERS,
+# with a reviewer who is not the author) closes that hole.
+# Title and body reach the scripts through env vars. Never interpolate them into run:
+# lines, because a PR title is attacker-controlled text.
+name: pr-checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      # Every gate reads these through gate.mjs (the checker-change path).
+      PR_BODY: ${{ github.event.pull_request.body }}
+      PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+      # REPO-SPECIFIC: where the checks live.
+      SCRIPTS: scripts
+      # /REPO-SPECIFIC
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Use the checkers from the base commit
+        # Every gate runs the base commit's checker through gate.mjs, which is also taken from the
+        # base. The checker-change path (RULES.md R15) can only turn a failure of the checker the
+        # PR changes into a warning, and then the PR's copy must pass. The PR's own copies run
+        # only when the base has no $SCRIPTS/check yet (the PR that adds them).
+        run: |
+          if git cat-file -e "$BASE_SHA:$SCRIPTS/check/pr-size.mjs" 2>/dev/null; then
+            mkdir -p "$RUNNER_TEMP/base"
+            git archive "$BASE_SHA" "$SCRIPTS" | tar -x -C "$RUNNER_TEMP/base"
+            echo "BASE_CHECKS=$RUNNER_TEMP/base/$SCRIPTS/check" >> "$GITHUB_ENV"
+          else
+            echo "::warning::base has no $SCRIPTS/check; using the PR's own checkers"
+            echo "BASE_CHECKS=$SCRIPTS/check" >> "$GITHUB_ENV"
+          fi
+          if git cat-file -e "$BASE_SHA:$SCRIPTS/check/gate.mjs" 2>/dev/null; then
+            echo "GATE=$RUNNER_TEMP/base/$SCRIPTS/check/gate.mjs" >> "$GITHUB_ENV"
+          else
+            echo "GATE=$SCRIPTS/check/gate.mjs" >> "$GITHUB_ENV"
+          fi
+      - name: Title, body and commit messages
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: node "$GATE" pr-format.mjs
+      - name: Size (lines, never commits)
+        run: node "$GATE" pr-size.mjs
+      - name: Secrets and personal paths
+        # Built-in patterns only: gitleaks is not installed here (no install step).
+        run: node "$GATE" secrets.mjs --all
+      - name: Template drift (repos made from BEST-OF-AI-DEV)
+        # REPO-SPECIFIC: point --template at a checkout of the template, or delete this step.
+        if: ${{ false }}
+        run: node "$GATE" template-sync.mjs --template ../BEST-OF-AI-DEV/template
+        # /REPO-SPECIFIC

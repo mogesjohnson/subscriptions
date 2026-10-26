@@ -1,0 +1,36 @@
+# BEST-OF-AI-DEV template v1. For work an agent or person can pick up. Bigger work gets docs/tasks/.
+name: Task
+description: A change with checkable acceptance criteria
+title: "<type>(<scope>): <what changes>"
+labels: [task]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is wrong or missing, for whom, and the evidence (link, log, number).
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: One checkable line each. A test, a command and its output, or a screenshot.
+      value: |
+        - [ ] 
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Out of scope
+      description: What must not change. Agents follow this literally.
+  - type: dropdown
+    id: size
+    attributes:
+      label: Expected size
+      options:
+        - One PR (under 400 lines)
+        - Several PRs (write a task spec in docs/tasks/ first)
+    validations:
+      required: true

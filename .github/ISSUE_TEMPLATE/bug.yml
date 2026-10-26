@@ -1,0 +1,30 @@
+# BEST-OF-AI-DEV template v1. A bug report an agent can reproduce without asking questions.
+name: Bug
+description: Something behaves differently from the docs or the spec
+title: "fix(<scope>): <symptom>"
+labels: [bug]
+body:
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands or clicks. Include the OS and shell, for example Windows PowerShell 5.1.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual
+      description: What should happen, what happened instead. Paste the error text, not a screenshot of it.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Logs, versions, commit SHA. Remove tokens, keys and personal paths first.
+  - type: textarea
+    id: test
+    attributes:
+      label: Regression test
+      description: The test that should fail now and pass after the fix. The fix PR adds it.

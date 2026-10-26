@@ -1,0 +1,7 @@
+#!/bin/sh
+# BEST-OF-AI-DEV template v1. Installed by: node scripts/setup-hooks.mjs
+# The list of checks lives in scripts/hooks/run-checks.mjs, not here.
+# REPO-SPECIFIC: change SCRIPTS only if the checks live somewhere else.
+SCRIPTS=scripts
+# /REPO-SPECIFIC
+exec node "$SCRIPTS/hooks/run-checks.mjs" pre-push
